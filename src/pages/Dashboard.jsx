@@ -1,0 +1,237 @@
+"use client"
+
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom"
+import { useState } from "react"
+import "../styles/dashboard.css"
+import DashboardHome from "../components/DashboardHome"
+import Restaurants from "../components/Restaurants"
+import Deals from "../components/Deals"
+import Users from "../components/Users"
+import Notifications from "../components/Notifications"
+import logo from "../assets/images/logo.png"
+import AddRestaurant from "../components/AddRestaurant"
+import RestaurantDetailPage from "../components/RestaurantDetailPage"
+
+function Dashboard({ onLogout }) {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [notificationCount] = useState(5)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  const isActive = (path) => {
+    return location.pathname === path || location.pathname.startsWith(path + "/")
+  }
+
+  const handleNavigation = (path) => {
+    navigate(path)
+    setMobileMenuOpen(false) // Close mobile menu after navigation
+  }
+
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen)
+  }
+
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false)
+  }
+
+  return (
+    <div className="dashboard-container">
+      {/* Hamburger Menu Button */}
+      <button className="hamburger-btn" onClick={toggleMobileMenu} aria-label="Toggle menu">
+        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d={mobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
+          />
+        </svg>
+      </button>
+
+      {/* Sidebar Backdrop */}
+      {mobileMenuOpen && <div className="sidebar-backdrop" onClick={closeMobileMenu}></div>}
+
+      {/* Sidebar */}
+      <aside className={`sidebar ${mobileMenuOpen ? 'mobile-open' : ''}`}>
+        <div className="sidebar-overlay">
+        </div>
+        <div className="sidebar-content">
+
+          <div className="sidebar-logo">
+            <div className="sidebar-logo-circle">
+              <img src={logo} alt="Logo" className="sidebar-logo-image" />
+            </div>
+          </div>
+
+          <nav className="sidebar-nav">
+            <button
+              className={`nav-item ${isActive("/dashboard") && location.pathname === "/dashboard" ? "active" : ""}`}
+              onClick={() => handleNavigation("/dashboard")}
+            >
+              <svg className="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                />
+              </svg>
+              All
+            </button>
+
+            <button
+              className={`nav-item ${isActive("/dashboard/restaurants") ? "active" : ""}`}
+              onClick={() => handleNavigation("/dashboard/restaurants")}
+            >
+              <svg className="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                />
+              </svg>
+              Restaurant
+            </button>
+
+            <button
+              className={`nav-item ${isActive("/dashboard/add-restaurants") ? "active" : ""}`}
+              onClick={() => handleNavigation("/dashboard/add-restaurants")}
+            >
+              <svg className="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 2v7c0 1.1.9 2 2 2h0c1.1 0 2-.9 2-2V2M5 11v11M15 2v20M19 7V2m0 5v15"
+                />
+                <circle cx="17" cy="17" r="5" fill="white" stroke="currentColor" strokeWidth={2} />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  stroke="#c9a961"
+                  d="M17 15v4m-2-2h4"
+                />
+              </svg>
+              Add Restaurant
+            </button>
+
+            <button
+              className={`nav-item ${isActive("/dashboard/deals") ? "active" : ""}`}
+              onClick={() => handleNavigation("/dashboard/deals")}
+            >
+              <svg className="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                />
+              </svg>
+              Deals
+            </button>
+            <button
+              className={`nav-item ${isActive("/dashboard/users") ? "active" : ""}`}
+              onClick={() => handleNavigation("/dashboard/users")}
+            >
+              <svg className="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                />
+              </svg>
+              Users
+            </button>
+
+            <button
+              className={`nav-item ${isActive("/dashboard/notifications") ? "active" : ""}`}
+              onClick={() => handleNavigation("/dashboard/notifications")}
+            >
+              <svg className="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                />
+              </svg>
+              Notifications
+            </button>
+          </nav>
+
+          <div className="sidebar-user">
+            <div className="user-avatar">P</div>
+            <div className="user-info">
+              <div className="user-name">Parker</div>
+              <div className="user-role">Admin</div>
+            </div>
+          </div>
+
+        </div>
+
+      </aside>
+
+      {/* Main Content */}
+      <main className="main-content">
+        {/* Top Bar */}
+        <div className="top-bar">
+          <div className="top-bar-left">
+            <div className="search-bar">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+              <input type="text" placeholder="Search..." />
+            </div>
+          </div>
+
+          <div className="top-bar-right">
+            <button className="icon-button" onClick={() => handleNavigation("/dashboard/notifications")}>
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                />
+              </svg>
+              {notificationCount > 0 && <span className="notification-badge">{notificationCount}</span>}
+            </button>
+
+            <div className="user-menu">
+              <div className="user-menu-avatar">P</div>
+              <span className="user-menu-name">Parker</span>
+            </div>
+
+            <button className="btn btn-sm btn-danger" onClick={onLogout}>
+              Log Out
+            </button>
+          </div>
+        </div>
+
+        {/* Content Area */}
+        <div className="content-area">
+          <Routes>
+            <Route path="/" element={<DashboardHome />} />
+            <Route path="/restaurants" element={<Restaurants />} />
+            <Route path="/add-restaurants" element={<AddRestaurant />} />
+            <Route path="/restaurantDetailPage" element={<RestaurantDetailPage />} />
+            <Route path="/deals" element={<Deals />} />
+            <Route path="/users" element={<Users />} />
+            <Route path="/notifications" element={<Notifications />} />
+          </Routes>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+export default Dashboard

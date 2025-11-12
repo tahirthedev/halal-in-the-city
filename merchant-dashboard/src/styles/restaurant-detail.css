@@ -1,0 +1,552 @@
+/* Restaurant Detail Page - Scoped Styles */
+
+.rd-page-wrapper {
+  padding: 20px 0;
+  max-width: 100%;
+}
+
+/* Header Section */
+.rd-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.rd-header-content {
+  flex: 1;
+}
+
+.rd-header-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+  background: linear-gradient(135deg, #C69A1A, #D4AC30);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.rd-header-subtitle {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+}
+
+.rd-header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* Button Styles */
+.rd-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.rd-btn-back {
+  background: #f8f9fa;
+  color: #495057;
+  border: 1px solid #e0e0e0;
+}
+
+.rd-btn-back:hover {
+  background: #e9ecef;
+  transform: translateY(-1px);
+}
+
+.rd-btn-primary {
+  background: linear-gradient(135deg, #C69A1A, #D4AC30);
+  color: white;
+  box-shadow: 0 4px 12px rgba(198, 154, 26, 0.25);
+}
+
+.rd-btn-primary:hover {
+  background: linear-gradient(135deg, #B8901A, #C69A1A);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(198, 154, 26, 0.35);
+}
+
+.rd-btn-sm {
+  padding: 8px 14px;
+  font-size: 0.85rem;
+}
+
+.rd-btn-outline {
+  background: white;
+  color: #495057;
+  border: 1px solid #dee2e6;
+}
+
+.rd-btn-outline:hover {
+  background: #f8f9fa;
+  border-color: #C69A1A;
+  color: #C69A1A;
+}
+
+.rd-btn-secondary {
+  background: #6c757d;
+  color: white;
+  border: 1px solid #6c757d;
+}
+
+.rd-btn-secondary:hover {
+  background: #5a6268;
+  transform: translateY(-1px);
+}
+
+.rd-btn-success {
+  background: #28a745;
+  color: white;
+  border: 1px solid #28a745;
+}
+
+.rd-btn-success:hover {
+  background: #218838;
+  transform: translateY(-1px);
+}
+
+.rd-btn-success:disabled,
+.rd-btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Overview Card */
+.rd-overview-card {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 32px;
+  background: white;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  margin-bottom: 24px;
+}
+
+.rd-restaurant-image {
+  width: 100%;
+  height: 280px;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.rd-restaurant-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.rd-overview-right {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.rd-restaurant-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.rd-restaurant-name {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.rd-restaurant-badges {
+  display: flex;
+  gap: 10px;
+}
+
+.rd-badge {
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.rd-badge-category {
+  background: linear-gradient(135deg, #C69A1A, #D4AC30);
+  color: white;
+}
+
+.rd-badge-status {
+  border: 1px solid;
+}
+
+.rd-badge-active {
+  background: #d1fae5;
+  color: #065f46;
+  border-color: #6ee7b7;
+}
+
+.rd-badge-pending {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fcd34d;
+}
+
+.rd-restaurant-owner {
+  font-size: 0.95rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.rd-restaurant-description {
+  font-size: 0.95rem;
+  color: #4b5563;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Stats Row */
+.rd-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 18px 0;
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.rd-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.rd-stat-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.rd-stat-icon-rating {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+}
+
+.rd-stat-icon-branches {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.rd-stat-icon-orders {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.rd-stat-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.rd-stat-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1;
+}
+
+.rd-stat-label {
+  font-size: 0.8rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+/* Contact Grid */
+.rd-contact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.rd-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #495057;
+  border: 1px solid #e9ecef;
+}
+
+.rd-contact-item svg {
+  color: #C69A1A;
+  flex-shrink: 0;
+}
+
+/* Section */
+.rd-section {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  margin-bottom: 24px;
+}
+
+.rd-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.rd-section-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.rd-section-badge {
+  display: flex;
+  gap: 10px;
+}
+
+.rd-badge-count {
+  padding: 6px 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #495057;
+}
+
+.rd-badge-success {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.rd-badge-warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* Branches Grid */
+.rd-branches-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 18px;
+}
+
+.rd-branch-card {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 18px;
+  transition: all 0.3s ease;
+}
+
+.rd-branch-card:hover {
+  background: white;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  transform: translateY(-3px);
+  border-color: #C69A1A;
+}
+
+.rd-branch-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.rd-branch-info {
+  flex: 1;
+}
+
+.rd-branch-name {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 6px 0;
+}
+
+.rd-branch-address {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.rd-branch-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Deals Grid */
+.rd-deals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.rd-deal-card {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 14px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.rd-deal-card:hover {
+  box-shadow: 0 8px 24px rgba(198, 154, 26, 0.15);
+  transform: translateY(-4px);
+  border-color: #C69A1A;
+}
+
+.rd-deal-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+}
+
+.rd-deal-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.rd-deal-card:hover .rd-deal-image {
+  transform: scale(1.05);
+}
+
+.rd-deal-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.rd-deal-discount {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.rd-deal-content {
+  padding: 16px;
+}
+
+.rd-deal-restaurant {
+  font-size: 0.8rem;
+  color: #C69A1A;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.rd-deal-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 10px 0;
+}
+
+.rd-deal-locations {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.rd-deal-locations svg {
+  flex-shrink: 0;
+  color: #9ca3af;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .rd-overview-card {
+    grid-template-columns: 1fr;
+  }
+
+  .rd-restaurant-image {
+    height: 220px;
+  }
+
+  .rd-stats-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .rd-branches-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .rd-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .rd-header-title {
+    font-size: 1.8rem;
+  }
+
+  .rd-stats-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .rd-contact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rd-branches-grid,
+  .rd-deals-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rd-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}

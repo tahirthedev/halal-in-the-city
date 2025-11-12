@@ -1,0 +1,101 @@
+User creation:
+$body = @{
+    firstName = "John"
+    lastName = "Doe"
+    email = "john.doe@example.com"
+    password = "SecurePassword123!"
+    phone = "5550123456"
+    role = "USER"
+} | ConvertTo-Json; Invoke-RestMethod -Uri "http://localhost:3000/api/v1/auth/register" -Method Post -Body $body -ContentType "application/json"
+
+
+User login:
+$loginBody = @{
+    email = "john.doe@example.com"
+    password = "SecurePassword123!"
+} | ConvertTo-Json; Invoke-RestMethod -Uri "http://localhost:3000/api/v1/auth/login" -Method Post -Body $loginBody -ContentType "application/json"
+
+
+Restaurant Creation:
+$ownerBody = @{
+    firstName = "Ahmed"
+    lastName = "Khan"
+    email = "ahmed.khan@restaurant.com"
+    password = "RestaurantPass123!"
+    phone = "4165551234"
+    role = "RESTAURANT_OWNER"
+} | ConvertTo-Json; $ownerResult = Invoke-RestMethod -Uri "http://localhost:3000/api/v1/auth/register" -Method Post -Body $ownerBody -ContentType "application/json"
+$ownerResult
+
+
+Restaurant Login:
+$restaurantBody = @{
+    name = "Halal Spice Kitchen"
+    email = "contact@halalspice.com"
+    phone = "4165559876"
+    address = "123 Main Street"
+    city = "Toronto"
+    province = "ON"
+    postalCode = "M5V 3A8"
+    description = "Authentic Pakistani and Indian halal cuisine"
+    cuisineType = "Pakistani/Indian"
+    website = "https://halalspice.com"
+    subscriptionTier = "BRONZE"
+} | ConvertTo-Json
+$headers = @{ "Authorization" = "Bearer $token" }
+Invoke-RestMethod -Uri "http://localhost:3000/api/v1/restaurants" -Method Post -Body $restaurantBody -ContentType "application/json" -Headers $headers
+
+
+
+Getting Restaurant ID for Deal Creation:
+$restaurants = Invoke-RestMethod -Uri "http://localhost:3000/api/v1/restaurants" -Method Get -Headers $headers
+$restaurantId = $restaurants.data.restaurants[0].id
+Write-Host "Restaurant ID: $restaurantId"
+
+
+Deal Creation:
+$dealBody = @{
+    restaurantId = $restaurantId
+    title = "20% Off Dinner Special"
+    description = "Get 20% off your entire dinner order. Valid for dine-in only."
+    terms = "Valid until 10 PM. Cannot be combined with other offers."
+    discountType = "PERCENTAGE"
+    discountValue = 20
+    minOrderAmount = 25.00
+    maxUses = 50
+    perUserLimit = 1
+    expiresAt = "2025-12-31T23:59:59Z"
+} | ConvertTo-Json
+Invoke-RestMethod -Uri "http://localhost:3000/api/v1/deals" -Method Post -Body $dealBody -ContentType "application/json" -Headers $headers
+
+
+Deal Details:
+$deals = Invoke-RestMethod -Uri "http://localhost:3000/api/v1/deals" -Method Get
+$dealId = $deals.data.deals[0].id
+$dealCode = $deals.data.deals[0].code
+Write-Host "Deal ID: $dealId"
+Write-Host "Deal Code: $dealCode"
+
+
+Logging in as regular user to test detail:
+$userLogin = @{
+    email = "john.doe@example.com"
+    password = "SecurePassword123!"
+} | ConvertTo-Json
+$userLoginResult = Invoke-RestMethod -Uri "http://localhost:3000/api/v1/auth/login" -Method Post -Body $userLogin -ContentType "application/json"
+$userToken = $userLoginResult.data.tokens.accessToken
+Write-Host "User token obtained: $($userToken.Substring(0,20))..."
+
+
+Deal redemption:
+Invoke-RestMethod -Uri "http://localhost:3000/api/v1/redemptions/redeem" -Method Post -Body $redemptionBody -ContentType "application/json" -Headers $userHeaders
+
+
+redemption history for the user:
+Invoke-RestMethod -Uri "http://localhost:3000/api/v1/redemptions" -Method Get -Headers $userHeaders
+
+
+Duplicate redemption:
+Invoke-RestMethod -Uri "http://localhost:3000/api/v1/redemptions/redeem" -Method Post -Body $redemptionBody -ContentType "application/json" -Headers $userHeaders
+
+

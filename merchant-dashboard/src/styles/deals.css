@@ -1,0 +1,480 @@
+/* Professional Deals Page Styling */
+.deals-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.deals-tabs button {
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  border: none;
+  color: #666;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.deals-tabs button.active {
+  color: #c69a1a;
+  border-bottom-color: #c69a1a;
+}
+
+.deals-tabs button:hover {
+  color: #c69a1a;
+}
+
+.deals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+  padding: 0;
+}
+
+.deal-card {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  height: 100%;
+}
+
+.deal-card:hover {
+  box-shadow: 0 12px 32px rgba(198, 154, 26, 0.18);
+  transform: translateY(-6px);
+  border-color: rgba(198, 154, 26, 0.3);
+}
+
+.deal-image-container {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  background: #f8fafc;
+}
+
+.deal-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: all 0.3s ease;
+}
+
+.deal-card:hover .deal-image {
+  transform: scale(1.05);
+}
+
+.deal-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: #c69a1a;
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.deal-discount {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.deal-content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  background: white;
+}
+
+.deal-restaurant {
+  font-size: 0.75rem;
+  color: #c69a1a;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.deal-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.deal-description {
+  font-size: 0.875rem;
+  color: #718096;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.deal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.deal-pricing {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.deal-price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #c69a1a;
+}
+
+.deal-original-price {
+  font-size: 1rem;
+  color: #a0aec0;
+  text-decoration: line-through;
+}
+
+.deal-stats {
+  display: flex;
+  gap: 1rem;
+}
+
+.deal-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: #718096;
+}
+
+.deal-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.deal-actions .btn {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.deal-actions .btn-primary {
+  background: linear-gradient(135deg, #c69a1a, #b8881a);
+  color: white;
+  border: none;
+}
+
+.deal-actions .btn-primary:hover {
+  background: linear-gradient(135deg, #b8881a, #a67817);
+  transform: translateY(-1px);
+}
+
+.deal-actions .btn-outline {
+  background: transparent;
+  color: #c69a1a;
+  border: 2px solid #c69a1a;
+}
+
+.deal-actions .btn-outline:hover {
+  background: #c69a1a;
+  color: white;
+}
+
+/* Status Indicators */
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-indicator.active {
+  background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+  color: #15803d;
+  border: 1px solid #16a34a;
+}
+
+.status-indicator.rejected {
+  background: linear-gradient(135deg, #fee2e2, #fca5a5);
+  color: #dc2626;
+  border: 1px solid #ef4444;
+}
+
+/* Deal Details Modal */
+.deal-modal {
+  max-width: 700px;
+}
+
+.deal-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.deal-details-image {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.deal-details-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.deal-details-content h3 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0;
+}
+
+.deal-details-restaurant {
+  font-size: 1rem;
+  color: #c69a1a;
+  font-weight: 600;
+  margin: 0;
+}
+
+.deal-details-description {
+  font-size: 1rem;
+  color: #718096;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.deal-details-info {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #f7fafc;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.info-item-label {
+  font-size: 0.75rem;
+  color: #718096;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-item-value {
+  font-size: 1rem;
+  color: #2d3748;
+  font-weight: 500;
+}
+
+/* Responsive Design */
+/* Tablet - 768px to 991px */
+@media (max-width: 991px) {
+  .deals-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+  
+  .deal-image-container {
+    height: 180px;
+  }
+}
+
+/* Mobile - up to 767px */
+@media (max-width: 767px) {
+  .deals-tabs {
+    flex-direction: column;
+    gap: 0;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .deals-tabs button {
+    padding: 1rem 1.25rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e5e5;
+    border-left: 3px solid transparent;
+    font-size: 0.95rem;
+  }
+  
+  .deals-tabs button.active {
+    border-left-color: #c69a1a;
+    background: rgba(198, 154, 26, 0.05);
+  }
+  
+  .deals-tabs button:last-child {
+    border-bottom: none;
+  }
+  
+  .deals-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+  }
+  
+  .deal-card {
+    border-radius: 12px;
+  }
+  
+  .deal-image-container {
+    height: 200px;
+  }
+  
+  .deal-badge {
+    font-size: 0.7rem;
+    padding: 0.35rem 0.7rem;
+  }
+  
+  .deal-discount {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.65rem;
+  }
+  
+  .deal-content {
+    padding: 1.25rem;
+  }
+  
+  .deal-title {
+    font-size: 1.125rem;
+  }
+  
+  .deal-restaurant {
+    font-size: 0.875rem;
+  }
+  
+  .deal-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .deal-actions button {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px;
+    font-size: 0.95rem;
+  }
+  
+  .deal-details-info {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .deal-stats {
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  
+  .deal-stat {
+    flex: 0 0 48%;
+  }
+}
+
+/* Small mobile - 480px and below */
+@media (max-width: 480px) {
+  .deals-tabs button {
+    padding: 0.875rem 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .deal-image-container {
+    height: 180px;
+  }
+  
+  .deal-content {
+    padding: 1rem;
+  }
+  
+  .deal-title {
+    font-size: 1rem;
+  }
+  
+  .deal-pricing {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  
+  .deal-original-price {
+    font-size: 0.9rem;
+  }
+  
+  .deal-discounted-price {
+    font-size: 1.25rem;
+  }
+  
+  .deal-stats {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .deal-stat {
+    flex: 1 1 100%;
+  }
+  
+  .deal-actions button {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+.info-label {
+  font-size: 0.75rem;
+  color: var(--gray-600);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-value {
+  font-size: 1rem;
+  color: var(--gray-800);
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .deals-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .deal-details-info {
+    grid-template-columns: 1fr;
+  }
+}
