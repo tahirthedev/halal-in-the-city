@@ -1,0 +1,150 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  RESTAURANT_OWNER
+  ADMIN
+}
+
+enum SubscriptionTier {
+  BRONZE
+  SILVER
+  GOLD
+  DIAMOND
+}
+
+enum DealStatus {
+  ACTIVE
+  PAUSED
+  EXPIRED
+  DRAFT
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  firstName String
+  lastName  String
+  phone     String?
+  role      UserRole @default(USER)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // User relationships
+  redemptions Redemption[]
+  restaurants Restaurant[]  // For restaurant owners
+
+  @@map("users")
+}
+
+model Restaurant {
+  id               String   @id @default(cuid())
+  name             String
+  email            String   @unique
+  phone            String
+  address          String
+  city             String
+  province         String?
+  postalCode       String
+  description      String?
+  cuisineType      String
+  website          String?
+  logo             String?
+  latitude         Float?
+  longitude        Float?
+  averageRating    Float?   @default(0)
+  totalReviews     Int      @default(0)
+  subscriptionTier SubscriptionTier @default(BRONZE)
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Relationships
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  subscription Subscription?
+  deals        Deal[]
+
+  @@map("restaurants")
+}
+
+model Subscription {
+  id           String           @id @default(cuid())
+  restaurantId String           @unique
+  tier         SubscriptionTier
+  dealLimit    Int // Number of concurrent deals allowed
+  monthlyFee   Decimal          @db.Decimal(10, 2)
+  isActive     Boolean          @default(true)
+  startDate    DateTime
+  endDate      DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  // Relationships
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+model Deal {
+  id              String     @id @default(cuid())
+  restaurantId    String
+  title           String
+  description     String
+  terms           String?
+  discountType    String     // PERCENTAGE, FIXED_AMOUNT, BUY_ONE_GET_ONE
+  discountValue   Float
+  minOrderAmount  Float?     @default(0)
+  maxUses         Int        @default(5)
+  usedCount       Int        @default(0)
+  remainingUses   Int        @default(5)
+  perUserLimit    Int        @default(1)
+  code            String     @unique
+  qrCode          String?
+  isActive        Boolean    @default(true)
+  startsAt        DateTime?  @default(now())
+  expiresAt       DateTime
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  // Relationships
+  restaurant  Restaurant   @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  redemptions Redemption[]
+
+  @@map("deals")
+}
+
+model Redemption {
+  id           String    @id @default(cuid())
+  userId       String
+  dealId       String
+  code         String
+  orderAmount  Float?
+  discountAmount Float?
+  finalAmount  Float?
+  status       String    @default("COMPLETED") // PENDING, COMPLETED, CANCELLED
+  location     Json?     // Store latitude/longitude
+  redeemedAt   DateTime  @default(now())
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deal Deal @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+  // Ensure one redemption per user per deal (if needed)
+  @@unique([userId, dealId])
+  @@map("redemptions")
+}

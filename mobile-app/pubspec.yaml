@@ -1,0 +1,91 @@
+name: halal_deals
+description: Mobile app for Halal in the City deals platform
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # State Management
+  flutter_riverpod: ^2.3.6
+  riverpod_annotation: ^2.1.1
+  
+  # Navigation
+  go_router: ^10.1.2
+  
+  # HTTP & API
+  dio: ^5.3.2
+  retrofit: ^4.0.1
+  json_annotation: ^4.8.1
+  
+  # Local Storage
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  
+  # UI & Components
+  cupertino_icons: ^1.0.2
+  google_fonts: ^5.1.0
+  flutter_svg: ^2.0.7
+  cached_network_image: ^3.2.3
+  
+  # Device & Platform
+  device_info_plus: ^9.1.0
+  package_info_plus: ^4.1.0
+  permission_handler: ^10.4.3
+  
+  # QR & Camera
+  qr_code_scanner: ^1.0.1
+  camera: ^0.10.5+2
+  
+  # Maps & Location
+  google_maps_flutter: ^2.4.0
+  geolocator: ^9.0.2
+  
+  # Firebase & Push
+  firebase_core: ^2.15.1
+  firebase_messaging: ^14.6.7
+  firebase_analytics: ^10.4.5
+  
+  # Utilities
+  intl: ^0.18.1
+  url_launcher: ^6.1.12
+  share_plus: ^7.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  
+  # Code Generation
+  build_runner: ^2.4.6
+  riverpod_generator: ^2.2.3
+  retrofit_generator: ^7.0.8
+  json_serializable: ^6.7.1
+  hive_generator: ^2.0.0
+  
+  # Linting
+  flutter_lints: ^2.0.0
+  
+  # Testing
+  mockito: ^5.4.2
+  integration_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/animations/
+
+  fonts:
+    - family: CustomIcons
+      fonts:
+        - asset: assets/fonts/CustomIcons.ttf
