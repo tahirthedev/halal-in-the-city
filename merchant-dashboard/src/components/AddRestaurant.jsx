@@ -1,13 +1,16 @@
 "use client"
 
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import apiService from '../services/api'
 import "../styles/dashboard.css"
 
 function AddRestaurant() {
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     name: '',
     type: '',
-    cuisine: '',
+    cuisine: [], // Changed to array for multiple selection
     ownerName: '',
     contactNumber: '',
     email: '',
@@ -16,12 +19,23 @@ function AddRestaurant() {
     logo: null
   })
   const [logoPreview, setLogoPreview] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
 
   const handleInputChange = (e) => {
     const { name, value, type, files } = e.target
     setFormData(prev => ({
       ...prev,
       [name]: type === 'file' ? files[0] : value
+    }))
+  }
+
+  const handleCuisineToggle = (cuisineValue) => {
+    setFormData(prev => ({
+      ...prev,
+      cuisine: prev.cuisine.includes(cuisineValue)
+        ? prev.cuisine.filter(c => c !== cuisineValue)
+        : [...prev.cuisine, cuisineValue]
     }))
   }
 
@@ -62,10 +76,53 @@ function AddRestaurant() {
     setLogoPreview(null)
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log('Form submitted:', formData)
-    // Handle form submission here
+    setLoading(true)
+    setError(null)
+    
+    try {
+      // Validate cuisine selection
+      if (formData.cuisine.length === 0) {
+        setError('Please select at least one cuisine category')
+        setLoading(false)
+        return
+      }
+
+      // Prepare restaurant data
+      const restaurantData = {
+        name: formData.name,
+        type: formData.type,
+        cuisine: formData.cuisine,
+        ownerName: formData.ownerName,
+        contactNumber: formData.contactNumber,
+        email: formData.email,
+        description: formData.description || null,
+        website: formData.website || null,
+      }
+
+      // If logo is selected, add it as base64
+      if (logoPreview) {
+        restaurantData.logo = logoPreview // Already in base64 format from FileReader
+      }
+
+      console.log('Submitting restaurant data:', restaurantData)
+      
+      const response = await apiService.createRestaurant(restaurantData)
+      
+      if (response.success) {
+        alert('Restaurant created successfully!')
+        navigate('/dashboard/restaurants')
+      } else {
+        setError(response.error?.message || response.message || 'Failed to create restaurant')
+      }
+      
+    } catch (err) {
+      console.error('Error creating restaurant:', err)
+      setError(err.message || 'Failed to create restaurant')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -119,22 +176,57 @@ function AddRestaurant() {
                         <option value="bakery">Bakery</option>
                       </select>
                     </div>
-                    <div className="form-group">
-                      <label className="form-label">Cuisine Category *</label>
-                      <select 
-                        name="cuisine"
-                        className="form-select"
-                        value={formData.cuisine}
-                        onChange={handleInputChange}
-                        required
-                      >
-                        <option value="">Select cuisine</option>
-                        <option value="middle-eastern">Middle Eastern</option>
-                        <option value="pakistani">Pakistani</option>
-                        <option value="indian">Indian</option>
-                        <option value="turkish">Turkish</option>
-                        <option value="international">International</option>
-                      </select>
+                    <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                      <label className="form-label">Cuisine Categories * (Select multiple)</label>
+                      <div style={{ 
+                        display: 'flex', 
+                        flexWrap: 'wrap', 
+                        gap: '12px',
+                        padding: '12px',
+                        backgroundColor: '#f8f9fa',
+                        borderRadius: '8px',
+                        border: '1px solid #e0e0e0'
+                      }}>
+                        {[
+                          { value: 'Middle Eastern', label: 'Middle Eastern' },
+                          { value: 'Pakistani', label: 'Pakistani' },
+                          { value: 'Indian', label: 'Indian' },
+                          { value: 'Turkish', label: 'Turkish' },
+                          { value: 'International', label: 'International' }
+                        ].map(cuisine => (
+                          <label 
+                            key={cuisine.value}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              padding: '8px 16px',
+                              backgroundColor: formData.cuisine.includes(cuisine.value) ? '#4CAF50' : 'white',
+                              color: formData.cuisine.includes(cuisine.value) ? 'white' : '#333',
+                              border: '2px solid',
+                              borderColor: formData.cuisine.includes(cuisine.value) ? '#4CAF50' : '#ddd',
+                              borderRadius: '20px',
+                              cursor: 'pointer',
+                              fontWeight: '500',
+                              transition: 'all 0.3s ease',
+                              userSelect: 'none'
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={formData.cuisine.includes(cuisine.value)}
+                              onChange={() => handleCuisineToggle(cuisine.value)}
+                              style={{ display: 'none' }}
+                            />
+                            {cuisine.label}
+                          </label>
+                        ))}
+                      </div>
+                      {formData.cuisine.length === 0 && (
+                        <p style={{ fontSize: '12px', color: '#666', marginTop: '8px' }}>
+                          Please select at least one cuisine category
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -312,18 +404,48 @@ function AddRestaurant() {
                 </div>
               </div>
 
+              {error && (
+                <div style={{ 
+                  padding: '12px 16px', 
+                  backgroundColor: '#fee', 
+                  border: '1px solid #fcc',
+                  borderRadius: '8px',
+                  color: '#c00',
+                  marginBottom: '16px'
+                }}>
+                  {error}
+                </div>
+              )}
+
               <div className="form-actions">
-                <button type="button" className="btn btn-secondary">
+                <button 
+                  type="button" 
+                  className="btn btn-secondary"
+                  onClick={() => navigate('/dashboard/restaurants')}
+                  disabled={loading}
+                >
                   <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary">
-                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
-                  Add Restaurant
+                <button 
+                  type="submit" 
+                  className="btn btn-primary"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <span>Creating...</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                      Add Restaurant
+                    </>
+                  )}
                 </button>
               </div>
             </form>

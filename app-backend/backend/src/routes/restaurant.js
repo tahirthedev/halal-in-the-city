@@ -5,6 +5,7 @@ const restaurantController = require('../controllers/restaurant');
 const { authenticate, authorize, authorizeOwnerOrAdmin } = require('../middleware/auth');
 const {
   restaurantValidation,
+  restaurantUpdateValidation,
   paginationValidation,
   idValidation
 } = require('../middleware/validation');
@@ -35,7 +36,7 @@ router.put('/:id',
   authenticate, 
   idValidation, 
   authorizeOwnerOrAdmin, 
-  restaurantValidation, 
+  restaurantUpdateValidation, 
   restaurantController.updateRestaurant
 );
 

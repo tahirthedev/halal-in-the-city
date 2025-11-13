@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../services/api_service.dart';
@@ -196,16 +198,7 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
             height: 200,
             margin: EdgeInsets.symmetric(horizontal: 32),
             child: _deal!['images'] != null && _deal!['images'].isNotEmpty
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      _deal!['images'][0],
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return _buildPlaceholderImage();
-                      },
-                    ),
-                  )
+                ? _buildDealImage(_deal!['images'][0])
                 : _buildPlaceholderImage(),
           ),
 
@@ -493,6 +486,63 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
           color: Colors.white,
           size: 24,
         ),
+      ),
+    );
+  }
+
+  // Helper method to build image from base64 or URL
+  Widget _buildDealImage(String? imageData) {
+    if (imageData == null || imageData.isEmpty) {
+      return _buildPlaceholderImage();
+    }
+
+    // Check if it's a base64 string
+    if (imageData.startsWith('data:image')) {
+      try {
+        // Extract base64 data after the comma
+        final base64String = imageData.split(',').last;
+        final Uint8List bytes = base64Decode(base64String);
+
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.memory(
+            bytes,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              print('❌ Error loading base64 image: $error');
+              return _buildPlaceholderImage();
+            },
+          ),
+        );
+      } catch (e) {
+        print('❌ Error decoding base64 image: $e');
+        return _buildPlaceholderImage();
+      }
+    }
+
+    // If it's a URL, use Image.network
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Image.network(
+        imageData,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          print('❌ Error loading network image: $error');
+          return _buildPlaceholderImage();
+        },
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded /
+                      loadingProgress.expectedTotalBytes!
+                  : null,
+              valueColor:
+                  const AlwaysStoppedAnimation<Color>(Color(0xFFB8860B)),
+            ),
+          );
+        },
       ),
     );
   }

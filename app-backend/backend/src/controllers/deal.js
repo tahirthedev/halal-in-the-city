@@ -244,6 +244,7 @@ const getDeals = async (req, res) => {
             province: true,
             latitude: true,
             longitude: true,
+            logo: true,
             averageRating: true,
             cuisineType: true
           }
@@ -297,6 +298,7 @@ const getDeals = async (req, res) => {
       usedCount: deal.usedCount,
       remainingUses: deal.remainingUses,
       perUserLimit: deal.perUserLimit,
+      images: deal.images,
       isActive: deal.isActive,
       startsAt: deal.startsAt,
       expiresAt: deal.expiresAt,
@@ -470,10 +472,14 @@ const updateDeal = async (req, res) => {
     }
 
     // Prepare update data
+    console.log('=== DEAL UPDATE DEBUG ===');
+    console.log('Request body:', JSON.stringify(req.body, null, 2));
+    console.log('Updates object:', JSON.stringify(updates, null, 2));
+    
     const updateData = {};
     const allowedFields = [
       'title', 'description', 'discountType', 'discountValue', 
-      'minOrderAmount', 'maxUses', 'perUserLimit', 'expiresAt', 'terms'
+      'minOrderAmount', 'maxUses', 'perUserLimit', 'expiresAt', 'terms', 'images'
     ];
 
     allowedFields.forEach(field => {
@@ -494,6 +500,9 @@ const updateDeal = async (req, res) => {
     if (updateData.maxUses) {
       updateData.remainingUses = updateData.maxUses - existingDeal.usedCount;
     }
+
+    console.log('Final updateData being sent to Prisma:', JSON.stringify(updateData, null, 2));
+    console.log('=== END DEBUG ===');
 
     const updatedDeal = await prisma.deal.update({
       where: { id },

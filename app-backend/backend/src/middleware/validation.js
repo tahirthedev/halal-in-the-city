@@ -223,6 +223,67 @@ const idValidation = [
   handleValidationErrors
 ];
 
+// Restaurant update validation (similar to restaurantValidation but all fields optional)
+const restaurantUpdateValidation = [
+  body('name')
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 100 })
+    .withMessage('Restaurant name must be between 2 and 100 characters'),
+  body('description')
+    .optional()
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage('Description cannot exceed 500 characters'),
+  body('cuisineType')
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Cuisine type must be between 2 and 50 characters'),
+  body('address')
+    .optional()
+    .trim()
+    .isLength({ min: 5, max: 200 })
+    .withMessage('Address must be between 5 and 200 characters'),
+  body('city')
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage('City must be between 2 and 50 characters'),
+  body('province')
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Province must be between 2 and 50 characters'),
+  body('postalCode')
+    .optional()
+    .trim()
+    .matches(/^[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d$/)
+    .withMessage('Valid Canadian postal code is required'),
+  body('phone')
+    .optional()
+    .isMobilePhone()
+    .withMessage('Valid phone number is required'),
+  body('email')
+    .optional()
+    .isEmail()
+    .normalizeEmail()
+    .withMessage('Valid email address is required'),
+  body('website')
+    .optional()
+    .isURL()
+    .withMessage('Valid website URL is required'),
+  body('subscriptionTier')
+    .optional()
+    .isIn(['BRONZE', 'SILVER', 'GOLD', 'DIAMOND'])
+    .withMessage('Subscription tier must be BRONZE, SILVER, GOLD, or DIAMOND'),
+  body('logo')
+    .optional()
+    .isString()
+    .withMessage('Logo must be a valid base64 string'),
+  handleValidationErrors
+];
+
 // Deal update validation (similar to dealValidation but all fields optional)
 const dealUpdateValidation = [
   body('title')
@@ -274,6 +335,10 @@ const dealUpdateValidation = [
     .trim()
     .isLength({ max: 1000 })
     .withMessage('Terms must be less than 1000 characters'),
+  body('images')
+    .optional()
+    .isArray()
+    .withMessage('Images must be an array of base64 strings'),
   handleValidationErrors
 ];
 
@@ -283,6 +348,7 @@ module.exports = {
   loginValidation,
   refreshTokenValidation,
   restaurantValidation,
+  restaurantUpdateValidation,
   dealValidation,
   dealUpdateValidation,
   redemptionValidation,

@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../../services/api_service.dart';
 import '../../services/restaurant_service.dart';
@@ -126,15 +128,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
               ),
             ),
             flexibleSpace: FlexibleSpaceBar(
-              background: _restaurant?['logo'] != null
-                  ? Image.network(
-                      _restaurant!['logo'],
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return _buildPlaceholderImage();
-                      },
-                    )
-                  : _buildPlaceholderImage(),
+              background: _buildRestaurantImage(_restaurant?['logo']),
             ),
           ),
 
@@ -352,31 +346,18 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
         ),
         child: Row(
           children: [
-            // Burger Image
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                width: 60,
-                height: 60,
-                color: Colors.grey[200],
-                child: deal['images'] != null && deal['images'].isNotEmpty
-                    ? Image.network(
-                        deal['images'][0],
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Icon(
-                            Icons.fastfood,
-                            size: 30,
-                            color: Colors.grey[400],
-                          );
-                        },
-                      )
-                    : Icon(
-                        Icons.fastfood,
-                        size: 30,
-                        color: Colors.grey[400],
-                      ),
-              ),
+            // Deal Image
+            Container(
+              width: 60,
+              height: 60,
+              color: Colors.grey[200],
+              child: deal['images'] != null && deal['images'].isNotEmpty
+                  ? _buildDealCardImage(deal['images'][0])
+                  : Icon(
+                      Icons.fastfood,
+                      size: 30,
+                      color: Colors.grey[400],
+                    ),
             ),
             SizedBox(width: 16),
 
@@ -442,6 +423,101 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // Helper method to build image from base64 or URL
+  Widget _buildRestaurantImage(String? imageData) {
+    if (imageData == null || imageData.isEmpty) {
+      return _buildPlaceholderImage();
+    }
+
+    // Check if it's a base64 string
+    if (imageData.startsWith('data:image')) {
+      try {
+        // Extract base64 data after the comma
+        final base64String = imageData.split(',').last;
+        final Uint8List bytes = base64Decode(base64String);
+
+        return Image.memory(
+          bytes,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            print('❌ Error loading base64 image: $error');
+            return _buildPlaceholderImage();
+          },
+        );
+      } catch (e) {
+        print('❌ Error decoding base64 image: $e');
+        return _buildPlaceholderImage();
+      }
+    }
+
+    // If it's a URL, use Image.network
+    return Image.network(
+      imageData,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        print('❌ Error loading network image: $error');
+        return _buildPlaceholderImage();
+      },
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Center(
+          child: CircularProgressIndicator(
+            value: loadingProgress.expectedTotalBytes != null
+                ? loadingProgress.cumulativeBytesLoaded /
+                    loadingProgress.expectedTotalBytes!
+                : null,
+            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFB8860B)),
+          ),
+        );
+      },
+    );
+  }
+
+  // Helper method for deal card images
+  Widget _buildDealCardImage(String? imageData) {
+    if (imageData == null || imageData.isEmpty) {
+      return Icon(Icons.fastfood, size: 40, color: Colors.grey[400]);
+    }
+
+    // Check if it's a base64 string
+    if (imageData.startsWith('data:image')) {
+      try {
+        final base64String = imageData.split(',').last;
+        final Uint8List bytes = base64Decode(base64String);
+
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.memory(
+            bytes,
+            width: 80,
+            height: 80,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Icon(Icons.fastfood, size: 40, color: Colors.grey[400]);
+            },
+          ),
+        );
+      } catch (e) {
+        print('❌ Error decoding base64 image: $e');
+        return Icon(Icons.fastfood, size: 40, color: Colors.grey[400]);
+      }
+    }
+
+    // If it's a URL
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Image.network(
+        imageData,
+        width: 80,
+        height: 80,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Icon(Icons.fastfood, size: 40, color: Colors.grey[400]);
+        },
       ),
     );
   }

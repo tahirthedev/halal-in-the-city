@@ -60,6 +60,7 @@ class DealService {
             id: true,
             name: true,
             city: true,
+            logo: true,
             latitude: true,
             longitude: true
           }
@@ -122,6 +123,7 @@ class DealService {
             address: true,
             city: true,
             phone: true,
+            logo: true,
             hours: true
           }
         }
@@ -188,6 +190,7 @@ class DealService {
         title: true,
         code: true,
         qrCode: true,
+        images: true,
         isActive: true,
         createdAt: true
       }
@@ -218,10 +221,15 @@ class DealService {
     const deal = await this.prisma.deal.update({
       where: { id },
       data: updateData,
-      select: {
-        id: true,
-        title: true,
-        updatedAt: true
+      include: {
+        restaurant: {
+          select: {
+            id: true,
+            name: true,
+            city: true,
+            logo: true
+          }
+        }
       }
     });
 

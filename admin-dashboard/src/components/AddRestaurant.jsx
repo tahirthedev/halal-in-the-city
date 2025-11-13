@@ -8,7 +8,7 @@ function AddRestaurant() {
   const [formData, setFormData] = useState({
     name: '',
     type: '',
-    cuisine: '',
+    cuisine: [], // Changed to array for multiple selection
     ownerName: '',
     contactNumber: '',
     email: '',
@@ -21,6 +21,7 @@ function AddRestaurant() {
     postalCode: '',
     province: ''
   })
+  const [logoPreview, setLogoPreview] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
@@ -32,16 +33,61 @@ function AddRestaurant() {
     }))
   }
 
+  const handleCuisineToggle = (cuisineValue) => {
+    setFormData(prev => ({
+      ...prev,
+      cuisine: prev.cuisine.includes(cuisineValue)
+        ? prev.cuisine.filter(c => c !== cuisineValue)
+        : [...prev.cuisine, cuisineValue]
+    }))
+  }
+
+  const handleLogoChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Image size should be less than 5MB')
+        return
+      }
+
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file')
+        return
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        logo: file
+      }))
+      
+      // Create preview and base64
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setLogoPreview(reader.result) // Store base64 for both preview and submission
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
 
     try {
+      // Validate cuisine selection
+      if (formData.cuisine.length === 0) {
+        setError('Please select at least one cuisine category')
+        setLoading(false)
+        return
+      }
+
       // Prepare the data to send
       const restaurantData = {
         restaurantName: formData.name,
-        cuisine: formData.cuisine,
+        cuisine: formData.cuisine.join(', '), // Join array to comma-separated string
         description: formData.description,
         website: formData.website,
         phone: formData.contactNumber,
@@ -51,8 +97,11 @@ function AddRestaurant() {
         province: formData.province || '',
         ownerName: formData.ownerName,
         ownerEmail: formData.email,
-        // Note: Files would need to be handled separately with FormData
-        // For now, we'll just send the basic data
+      }
+
+      // Add logo if uploaded (as base64)
+      if (logoPreview) {
+        restaurantData.logo = logoPreview
       }
 
       const response = await apiService.createRestaurantWithOwner(restaurantData)
@@ -142,22 +191,57 @@ Login credentials have been sent to the owner's email.`)
                         <option value="bakery">Bakery</option>
                       </select>
                     </div>
-                    <div className="form-group">
-                      <label className="form-label">Cuisine Category *</label>
-                      <select 
-                        name="cuisine"
-                        className="form-select"
-                        value={formData.cuisine}
-                        onChange={handleInputChange}
-                        required
-                      >
-                        <option value="">Select cuisine</option>
-                        <option value="middle-eastern">Middle Eastern</option>
-                        <option value="pakistani">Pakistani</option>
-                        <option value="indian">Indian</option>
-                        <option value="turkish">Turkish</option>
-                        <option value="international">International</option>
-                      </select>
+                    <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                      <label className="form-label">Cuisine Categories * (Select multiple)</label>
+                      <div style={{ 
+                        display: 'flex', 
+                        flexWrap: 'wrap', 
+                        gap: '12px',
+                        padding: '12px',
+                        backgroundColor: '#f8f9fa',
+                        borderRadius: '8px',
+                        border: '1px solid #e0e0e0'
+                      }}>
+                        {[
+                          { value: 'Middle Eastern', label: 'Middle Eastern' },
+                          { value: 'Pakistani', label: 'Pakistani' },
+                          { value: 'Indian', label: 'Indian' },
+                          { value: 'Turkish', label: 'Turkish' },
+                          { value: 'International', label: 'International' }
+                        ].map(cuisine => (
+                          <label 
+                            key={cuisine.value}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              padding: '8px 16px',
+                              backgroundColor: formData.cuisine.includes(cuisine.value) ? '#4CAF50' : 'white',
+                              color: formData.cuisine.includes(cuisine.value) ? 'white' : '#333',
+                              border: '2px solid',
+                              borderColor: formData.cuisine.includes(cuisine.value) ? '#4CAF50' : '#ddd',
+                              borderRadius: '20px',
+                              cursor: 'pointer',
+                              fontWeight: '500',
+                              transition: 'all 0.3s ease',
+                              userSelect: 'none'
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={formData.cuisine.includes(cuisine.value)}
+                              onChange={() => handleCuisineToggle(cuisine.value)}
+                              style={{ display: 'none' }}
+                            />
+                            {cuisine.label}
+                          </label>
+                        ))}
+                      </div>
+                      {formData.cuisine.length === 0 && (
+                        <p style={{ fontSize: '12px', color: '#666', marginTop: '8px' }}>
+                          Please select at least one cuisine category
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -229,15 +313,90 @@ Login credentials have been sent to the owner's email.`)
                         onChange={handleInputChange}
                       />
                     </div>
-                    <div className="form-group">
-                      <label className="form-label">Logo Upload</label>
-                      <input 
-                        type="file" 
-                        name="logo"
-                        className="form-file" 
-                        accept="image/*"
-                        onChange={handleInputChange}
-                      />
+                    <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                      <label className="form-label">Restaurant Logo</label>
+                      <div style={{ marginTop: '12px' }}>
+                        {!logoPreview ? (
+                          <div 
+                            style={{
+                              border: '2px dashed #d1d5db',
+                              borderRadius: '12px',
+                              padding: '32px',
+                              textAlign: 'center',
+                              cursor: 'pointer',
+                              transition: 'all 0.3s ease',
+                              background: '#f9fafb',
+                            }}
+                            onMouseOver={(e) => {
+                              e.currentTarget.style.borderColor = '#c69a1a'
+                              e.currentTarget.style.background = '#fffbf0'
+                            }}
+                            onMouseOut={(e) => {
+                              e.currentTarget.style.borderColor = '#d1d5db'
+                              e.currentTarget.style.background = '#f9fafb'
+                            }}
+                            onClick={() => document.getElementById('logoInput').click()}
+                          >
+                            <svg 
+                              width="48" 
+                              height="48" 
+                              fill="none" 
+                              stroke="#c69a1a" 
+                              viewBox="0 0 24 24"
+                              style={{ margin: '0 auto 12px' }}
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <p style={{ fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '4px' }}>
+                              Click to upload logo
+                            </p>
+                            <p style={{ fontSize: '12px', color: '#6b7280' }}>
+                              PNG, JPG, WEBP up to 5MB
+                            </p>
+                          </div>
+                        ) : (
+                          <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', border: '2px solid #c69a1a', maxWidth: '300px', margin: '0 auto' }}>
+                            <img 
+                              src={logoPreview} 
+                              alt="Logo preview" 
+                              style={{ width: '100%', height: '300px', objectFit: 'contain', display: 'block', background: '#f9fafb', padding: '16px' }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setLogoPreview(null)
+                                setFormData(prev => ({ ...prev, logo: null }))
+                              }}
+                              style={{
+                                position: 'absolute',
+                                top: '12px',
+                                right: '12px',
+                                background: '#ef4444',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '8px',
+                                padding: '8px 12px',
+                                fontSize: '12px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                              }}
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        )}
+                        <input
+                          id="logoInput"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleLogoChange}
+                          style={{ display: 'none' }}
+                        />
+                      </div>
+                      <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '8px', textAlign: 'center' }}>
+                        Recommended: Square image (500x500px) for best display
+                      </small>
                     </div>
                     <div className="form-group">
                       <label className="form-label">Upload Halal Certification</label>

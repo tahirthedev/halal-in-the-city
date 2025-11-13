@@ -53,6 +53,7 @@ class RestaurantService {
         phone: true,
         email: true,
         website: true,
+        logo: true,
         isActive: true,
         averageRating: true,
         totalReviews: true,
@@ -130,6 +131,7 @@ class RestaurantService {
             maxUses: true,
             usedCount: true,
             remainingUses: true,
+            images: true,
             expiresAt: true
           }
         },
@@ -256,6 +258,7 @@ class RestaurantService {
         id: true,
         name: true,
         city: true,
+        logo: true,
         isActive: true,
         subscriptionTier: true,
         createdAt: true,

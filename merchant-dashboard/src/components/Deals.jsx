@@ -46,7 +46,7 @@ function Deals() {
           discountValue: deal.discountValue,
           discount: formatDiscount(deal.discountType, deal.discountValue),
           status: getStatus(deal),
-          image: defaultImages[index % defaultImages.length],
+          image: (deal.images && deal.images.length > 0) ? deal.images[0] : defaultImages[index % defaultImages.length],
           validUntil: deal.expiresAt,
           timesAvailed: deal.usedCount || 0,
           maxUses: deal.maxUses || 5,
@@ -403,70 +403,72 @@ function Deals() {
             </div>
             <div className="modal-body">
               <div className="deal-details">
-                <div style={{ position: 'relative' }}>
-                  <img
-                    src={dealImagePreview || selectedDeal.image || "/placeholder.svg"}
-                    alt={selectedDeal.title}
-                    className="deal-details-image"
-                  />
-                  {editingImage && (
-                    <div style={{
-                      position: 'absolute',
-                      inset: 0,
-                      background: 'rgba(0,0,0,0.7)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '12px',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease'
-                    }}
-                    onClick={() => document.getElementById('dealImageInput').click()}
-                    >
-                      <svg width="48" height="48" fill="none" stroke="white" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      <p style={{ color: 'white', fontSize: '14px', fontWeight: '600' }}>
-                        {dealImagePreview ? 'Change Image' : 'Upload New Image'}
-                      </p>
-                    </div>
-                  )}
-                  <input
-                    id="dealImageInput"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleDealImageChange}
-                    style={{ display: 'none' }}
-                  />
-                  {!editingImage && (
-                    <button
-                      onClick={() => setEditingImage(true)}
-                      style={{
+                <div>
+                  <div style={{ position: 'relative' }}>
+                    <img
+                      src={dealImagePreview || selectedDeal.image || "/placeholder.svg"}
+                      alt={selectedDeal.title}
+                      className="deal-details-image"
+                    />
+                    {editingImage && (
+                      <div style={{
                         position: 'absolute',
-                        top: '12px',
-                        right: '12px',
-                        background: '#6c757d',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '8px',
-                        padding: '8px 12px',
-                        fontSize: '12px',
-                        fontWeight: '600',
-                        cursor: 'pointer',
+                        inset: 0,
+                        background: 'rgba(0,0,0,0.7)',
                         display: 'flex',
+                        flexDirection: 'column',
                         alignItems: 'center',
-                        gap: '6px',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                        justifyContent: 'center',
+                        gap: '12px',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease'
                       }}
-                    >
-                      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                      Edit Image
-                    </button>
-                  )}
+                      onClick={() => document.getElementById('dealImageInput').click()}
+                      >
+                        <svg width="48" height="48" fill="none" stroke="white" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <p style={{ color: 'white', fontSize: '14px', fontWeight: '600' }}>
+                          {dealImagePreview ? 'Change Image' : 'Upload New Image'}
+                        </p>
+                      </div>
+                    )}
+                    <input
+                      id="dealImageInput"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleDealImageChange}
+                      style={{ display: 'none' }}
+                    />
+                    {!editingImage && (
+                      <button
+                        onClick={() => setEditingImage(true)}
+                        style={{
+                          position: 'absolute',
+                          top: '12px',
+                          right: '12px',
+                          background: '#6c757d',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '8px',
+                          padding: '8px 12px',
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                        }}
+                      >
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Edit Image
+                      </button>
+                    )}
+                  </div>
                   {editingImage && dealImagePreview && (
                     <div style={{ marginTop: '12px', display: 'flex', gap: '8px' }}>
                       <button

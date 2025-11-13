@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../../services/restaurant_service.dart';
 import '../../services/deal_service.dart';
@@ -16,7 +18,7 @@ class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  String _selectedCategory = '';
+  String? _selectedCuisine; // Single cuisine selection for filtering
 
   // Services
   late final RestaurantService
@@ -82,15 +84,33 @@ class _HomeScreenState extends State<HomeScreen>
 
       print('✅ Loaded ${deals.length} deals');
 
-      // Filter by category if selected
-      if (_selectedCategory.isNotEmpty) {
+      // Filter by cuisine category if one is selected
+      if (_selectedCuisine != null) {
         deals = deals.where((deal) {
           final restaurant = deal['restaurant'];
-          return restaurant != null &&
-              restaurant['category'] == _selectedCategory;
+          if (restaurant == null) {
+            return false;
+          }
+
+          final cuisineType = restaurant['cuisineType'];
+          if (cuisineType == null || cuisineType.toString().trim().isEmpty) {
+            return false;
+          }
+
+          // Split cuisineType by comma and trim whitespace
+          // Restaurants can have multiple cuisines (e.g., "Middle Eastern, Pakistani")
+          final cuisines = cuisineType
+              .toString()
+              .split(',')
+              .map((c) => c.trim().toLowerCase())
+              .where((c) => c.isNotEmpty)
+              .toList();
+
+          // Check if selected cuisine matches any of the restaurant's cuisines
+          return cuisines.contains(_selectedCuisine!.toLowerCase());
         }).toList();
         print(
-            '🔍 Filtered to ${deals.length} deals for category: $_selectedCategory');
+            '🔍 Filtered to ${deals.length} deals for cuisine: $_selectedCuisine');
       }
 
       setState(() {
@@ -463,9 +483,12 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _buildCategories() {
     final categories = [
-      {'name': 'Burger', 'icon': '🍔'},
-      {'name': 'Pizza', 'icon': '🍕'},
-      {'name': 'Sandwich', 'icon': '🥪'},
+      {'name': 'All', 'icon': '🍴'},
+      {'name': 'Middle Eastern', 'icon': '🥙'},
+      {'name': 'Pakistani', 'icon': '🍛'},
+      {'name': 'Indian', 'icon': '🍜'},
+      {'name': 'Turkish', 'icon': '🥘'},
+      {'name': 'International', 'icon': '🍽️'},
     ];
 
     return SizedBox(
@@ -476,23 +499,37 @@ class _HomeScreenState extends State<HomeScreen>
         itemCount: categories.length,
         itemBuilder: (context, index) {
           final category = categories[index];
-          final isSelected = _selectedCategory == category['name'];
+          // "All" is selected when no cuisine filter is active
+          final isSelected = category['name'] == 'All'
+              ? _selectedCuisine == null
+              : _selectedCuisine == category['name'];
 
           return GestureDetector(
             onTap: () {
               setState(() {
-                _selectedCategory = isSelected ? '' : category['name']!;
+                // If "All" is selected, clear the filter
+                if (category['name'] == 'All') {
+                  _selectedCuisine = null;
+                } else {
+                  // Single selection: toggle off if same, otherwise set new selection
+                  if (isSelected) {
+                    _selectedCuisine = null;
+                  } else {
+                    _selectedCuisine = category['name'];
+                  }
+                }
               });
-              _loadDeals(); // Reload deals with new category filter
+              _loadDeals(); // Reload deals with new cuisine filter
             },
             child: Container(
               margin: const EdgeInsets.only(right: 12),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               decoration: BoxDecoration(
-                color: isSelected ? Colors.black : Colors.white,
+                color: isSelected ? const Color(0xFFB8860B) : Colors.white,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: isSelected ? Colors.black : Colors.grey[300]!,
+                  color:
+                      isSelected ? const Color(0xFFB8860B) : Colors.grey[300]!,
                 ),
               ),
               child: Row(
@@ -563,6 +600,19 @@ class _HomeScreenState extends State<HomeScreen>
           final deal = _deals![index];
           final restaurant = deal['restaurant'] ?? {};
 
+          // Get the first image from the images array
+          String? imageUrl;
+          if (deal['images'] != null &&
+              deal['images'] is List &&
+              (deal['images'] as List).isNotEmpty) {
+            imageUrl = deal['images'][0];
+            print(
+                '🎯 Deal "${deal['title']}" has image: ${imageUrl?.substring(0, imageUrl.length > 50 ? 50 : imageUrl.length)}...');
+          } else {
+            print(
+                '⚠️ Deal "${deal['title']}" has NO image data. Images field: ${deal['images']}');
+          }
+
           return _buildDealCard(
             deal['title'] ?? 'Special Deal',
             restaurant['address'] ?? 'Address not available',
@@ -570,6 +620,7 @@ class _HomeScreenState extends State<HomeScreen>
             (deal['distance'] ?? 0.0).toDouble(),
             deal['redeemCount'] ?? 0,
             dealId: deal['id'],
+            imageUrl: imageUrl,
           );
         },
       ),
@@ -578,7 +629,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _buildDealCard(
       String name, String address, double rating, double distance, int deals,
-      {String? dealId}) {
+      {String? dealId, String? imageUrl}) {
     return GestureDetector(
       onTap: () {
         if (dealId != null) {
@@ -609,8 +660,14 @@ class _HomeScreenState extends State<HomeScreen>
                 borderRadius:
                     const BorderRadius.vertical(top: Radius.circular(12)),
               ),
-              child: Center(
-                child: Icon(Icons.fastfood, size: 50, color: Colors.grey[400]),
+              child: ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(12)),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 120,
+                  child: _buildImage(imageUrl, 120),
+                ),
               ),
             ),
             Padding(
@@ -735,6 +792,10 @@ class _HomeScreenState extends State<HomeScreen>
             )
           else
             ..._restaurants!.take(5).map((restaurant) {
+              final logo = restaurant['logo'];
+              print(
+                  '🏪 Restaurant "${restaurant['name']}" logo: ${logo != null ? (logo.toString().substring(0, logo.toString().length > 50 ? 50 : logo.toString().length) + '...') : 'NO LOGO'}');
+
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: _buildPopularMealItem(
@@ -744,6 +805,7 @@ class _HomeScreenState extends State<HomeScreen>
                   0.0, // Distance - will be calculated when geolocation is added
                   (restaurant['deals']?.length ?? 0),
                   restaurantId: restaurant['id'],
+                  logoUrl: logo,
                 ),
               );
             }).toList(),
@@ -754,7 +816,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _buildPopularMealItem(
       String name, String address, double rating, double distance, int deals,
-      {String? restaurantId}) {
+      {String? restaurantId, String? logoUrl}) {
     return GestureDetector(
       onTap: () {
         if (restaurantId != null) {
@@ -784,7 +846,10 @@ class _HomeScreenState extends State<HomeScreen>
                 color: Colors.grey[200],
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(Icons.local_pizza, size: 35, color: Colors.grey[400]),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: _buildImage(logoUrl, 70),
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -961,6 +1026,72 @@ class _HomeScreenState extends State<HomeScreen>
           ),
         ],
       ),
+    );
+  }
+
+  // Helper method to build image from base64 or URL
+  Widget _buildImage(String? imageData, double size) {
+    print(
+        '📸 Building image with data: ${imageData?.substring(0, imageData.length > 50 ? 50 : imageData.length)}...');
+
+    if (imageData == null || imageData.isEmpty) {
+      print('⚠️ No image data provided');
+      return Icon(Icons.fastfood, size: size * 0.5, color: Colors.grey[400]);
+    }
+
+    // Check if it's a base64 string
+    if (imageData.startsWith('data:image')) {
+      print('✅ Detected base64 image');
+      try {
+        // Extract base64 data after the comma
+        final base64String = imageData.split(',').last;
+        final Uint8List bytes = base64Decode(base64String);
+        print('✅ Successfully decoded ${bytes.length} bytes');
+
+        return Image.memory(
+          bytes,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            print('❌ Error loading base64 image: $error');
+            print('Stack trace: $stackTrace');
+            return Icon(Icons.fastfood,
+                size: size * 0.5, color: Colors.grey[400]);
+          },
+        );
+      } catch (e, stackTrace) {
+        print('❌ Error decoding base64 image: $e');
+        print('Stack trace: $stackTrace');
+        print('Image data length: ${imageData.length}');
+        return Icon(Icons.fastfood, size: size * 0.5, color: Colors.grey[400]);
+      }
+    }
+
+    // If it's a URL, use Image.network
+    print('🌐 Detected network image URL');
+    return Image.network(
+      imageData,
+      width: size,
+      height: size,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        print('❌ Error loading network image: $error');
+        print('Stack trace: $stackTrace');
+        return Icon(Icons.fastfood, size: size * 0.5, color: Colors.grey[400]);
+      },
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Center(
+          child: CircularProgressIndicator(
+            value: loadingProgress.expectedTotalBytes != null
+                ? loadingProgress.cumulativeBytesLoaded /
+                    loadingProgress.expectedTotalBytes!
+                : null,
+            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFB8860B)),
+          ),
+        );
+      },
     );
   }
 }

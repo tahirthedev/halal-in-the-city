@@ -41,7 +41,7 @@ function Deals() {
           discount: deal.discountType === 'PERCENTAGE' ? `${deal.discountValue}%` :
                     deal.discountType === 'FIXED' ? `$${deal.discountValue}` : 'BOGO',
           status: deal.isActive && new Date(deal.expiresAt) > new Date() ? 'active' : 'expired',
-          image: deal.image || img1, // Use default image if no image
+          image: (deal.images && deal.images.length > 0) ? deal.images[0] : img1, // Use first image from array or default
           validUntil: new Date(deal.expiresAt).toLocaleDateString(),
           timesAvailed: deal.usedCount || 0,
           maxUses: deal.maxUses,
