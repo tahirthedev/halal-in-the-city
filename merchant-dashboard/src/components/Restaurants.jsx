@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import img1 from "../assets/images/res1.jpg"
 import img2 from "../assets/images/res2.jpg"
 import img3 from "../assets/images/res3.jpg"
@@ -6,6 +6,8 @@ import img4 from "../assets/images/res4.jpg"
 import { Link } from "react-router-dom"
 import "../styles/users.css"
 import "../styles/modal.css"
+import apiService from "../services/api"
+
 const Restaurants = () => {
   const [showAddModal, setShowAddModal] = useState(false)
   const [showViewModal, setShowViewModal] = useState(false)
@@ -15,10 +17,63 @@ const Restaurants = () => {
   const [filterStatus, setFilterStatus] = useState("all")
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 6
+  const [restaurants, setRestaurants] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
+  // Default placeholder images
+  const defaultImages = [img1, img2, img3, img4]
 
-  // Sample data
-  const restaurants = [
+  useEffect(() => {
+    fetchRestaurants()
+  }, [])
+
+  const fetchRestaurants = async () => {
+    try {
+      setLoading(true)
+      const response = await apiService.getMyRestaurants()
+      
+      console.log('🏪 Fetched restaurants from API:', response.data.restaurants)
+      
+      if (response.success && response.data.restaurants) {
+        // Transform API data to component format
+        const transformedRestaurants = response.data.restaurants.map((restaurant, index) => {
+          console.log(`🏪 Restaurant "${restaurant.name}" logo:`, restaurant.logo ? 'Has logo data' : 'NO LOGO')
+          return {
+            id: restaurant.id,
+            name: restaurant.name,
+            category: restaurant.cuisineType || 'Restaurant',
+          ownerName: restaurant.owner?.firstName + ' ' + restaurant.owner?.lastName || 'Owner',
+          email: restaurant.contactEmail || restaurant.owner?.email || 'N/A',
+          website: restaurant.website || 'N/A',
+          phone: restaurant.contactPhone || 'N/A',
+          description: restaurant.description || 'No description available',
+          image: restaurant.logo || defaultImages[index % defaultImages.length], // Use real logo or fallback to placeholder
+          rating: restaurant.rating || 0,
+          totalOrders: restaurant.totalOrders || 0,
+          branches: restaurant.branches || [],
+          status: restaurant.approvalStatus?.toLowerCase() || 'pending',
+          joinedDate: restaurant.createdAt,
+          certificateUrl: restaurant.halalCertificate || null
+          }
+        })
+        
+        console.log('✅ Transformed restaurants:', transformedRestaurants)
+        setRestaurants(transformedRestaurants)
+      }
+      setError(null)
+    } catch (err) {
+      console.error('Error fetching restaurants:', err)
+      setError('Failed to load restaurants')
+      // Keep empty array on error
+      setRestaurants([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Sample data (fallback - removed, using API data)
+  const sampleRestaurants = [
     {
       id: 1,
       name: "Al-Baik Express",

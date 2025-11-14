@@ -138,13 +138,22 @@ const generateVerificationCode = async (req, res) => {
               expiresIn: Math.floor((24 * 60 * 60 * 1000 - codeAge) / 1000)
             }
           },
-          message: 'Using existing verification code'
+          message: 'You already have an active verification code'
         });
       } else {
-        // Delete expired pending redemption
-        await prisma.redemption.delete({
-          where: { id: redemption.id }
-        });
+        // Delete expired pending redemption and restore deal count
+        await prisma.$transaction([
+          prisma.redemption.delete({
+            where: { id: redemption.id }
+          }),
+          prisma.deal.update({
+            where: { id: dealId },
+            data: {
+              remainingUses: { increment: 1 }
+            }
+          })
+        ]);
+        console.log(`Restored deal count for expired redemption ${redemption.id}`);
       }
     }
 
@@ -160,18 +169,30 @@ const generateVerificationCode = async (req, res) => {
       isUnique = !existing;
     }
 
-    // Create pending redemption
-    redemption = await prisma.redemption.create({
-      data: {
-        userId,
-        dealId,
-        code: deal.code,
-        verificationCode,
-        status: 'PENDING',
-        orderAmount: 0,
-        discountAmount: 0,
-        finalAmount: 0
-      }
+    // Create pending redemption and decrement deal count in transaction
+    redemption = await prisma.$transaction(async (tx) => {
+      const newRedemption = await tx.redemption.create({
+        data: {
+          userId,
+          dealId,
+          code: deal.code,
+          verificationCode,
+          status: 'PENDING',
+          orderAmount: 0,
+          discountAmount: 0,
+          finalAmount: 0
+        }
+      });
+
+      // Decrement remainingUses when code is generated
+      await tx.deal.update({
+        where: { id: dealId },
+        data: {
+          remainingUses: { decrement: 1 }
+        }
+      });
+
+      return newRedemption;
     });
 
     res.status(201).json({
@@ -253,9 +274,18 @@ const verifyAndCompleteRedemption = async (req, res) => {
     // Check if code expired (24 hours)
     const codeAge = Date.now() - redemption.createdAt.getTime();
     if (codeAge > 24 * 60 * 60 * 1000) {
-      await prisma.redemption.delete({
-        where: { id: redemption.id }
-      });
+      // Delete expired code and restore deal count
+      await prisma.$transaction([
+        prisma.redemption.delete({
+          where: { id: redemption.id }
+        }),
+        prisma.deal.update({
+          where: { id: redemption.dealId },
+          data: {
+            remainingUses: { increment: 1 }
+          }
+        })
+      ]);
       return res.status(400).json({
         success: false,
         error: {
@@ -343,11 +373,11 @@ const verifyAndCompleteRedemption = async (req, res) => {
         }
       });
 
+      // Increment usedCount (remainingUses was already decremented when code was generated)
       await tx.deal.update({
         where: { id: redemption.dealId },
         data: {
-          usedCount: { increment: 1 },
-          remainingUses: { decrement: 1 }
+          usedCount: { increment: 1 }
         }
       });
 

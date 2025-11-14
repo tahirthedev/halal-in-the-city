@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../config/constants.dart';
+import 'storage_service.dart';
 
 /// HTTP client service for making API requests
 class ApiService {
@@ -22,7 +23,15 @@ class ApiService {
     // Add interceptor for logging and error handling
     _dio.interceptors.add(
       InterceptorsWrapper(
-        onRequest: (options, handler) {
+        onRequest: (options, handler) async {
+          // Load token from storage if not already set
+          if (_authToken == null) {
+            final storedToken = StorageService.getToken();
+            if (storedToken != null) {
+              _authToken = storedToken;
+            }
+          }
+
           // Add auth token to headers if available
           if (_authToken != null) {
             options.headers['Authorization'] = 'Bearer $_authToken';

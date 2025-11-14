@@ -9,12 +9,16 @@ class DealRedemptionScreen extends StatefulWidget {
   final String dealId;
   final String dealTitle;
   final String restaurantName;
+  final Map<String, dynamic>? dealData;
+  final Map<String, dynamic>? restaurantData;
 
   const DealRedemptionScreen({
     super.key,
     required this.dealId,
     required this.dealTitle,
     required this.restaurantName,
+    this.dealData,
+    this.restaurantData,
   });
 
   @override
@@ -24,7 +28,6 @@ class DealRedemptionScreen extends StatefulWidget {
 class _DealRedemptionScreenState extends State<DealRedemptionScreen> {
   late final DealService _dealService;
   String? _redemptionCode;
-  String? _redemptionId;
   bool _isGenerating = true;
   String? _error;
   int _timeRemaining = 86400; // 24 hours (24 * 60 * 60 seconds)
@@ -65,11 +68,13 @@ class _DealRedemptionScreenState extends State<DealRedemptionScreen> {
       final redemption = await _dealService.createRedemption(widget.dealId);
 
       setState(() {
-        _redemptionId = redemption['id'];
         _redemptionCode = redemption['verificationCode'] ?? redemption['code'];
         _isGenerating = false;
         _error = null;
       });
+
+      // Save to local storage for "My Active Deals" screen
+      _saveActiveRedemption(redemption);
 
       // Start countdown timer
       _startTimer();
@@ -90,6 +95,43 @@ class _DealRedemptionScreenState extends State<DealRedemptionScreen> {
           ),
         );
       }
+    }
+  }
+
+  Future<void> _saveActiveRedemption(Map<String, dynamic> redemption) async {
+    try {
+      // Get existing active redemptions
+      final existing = StorageService.get('active_redemptions');
+      List<dynamic> redemptions = [];
+
+      if (existing != null && existing is List) {
+        redemptions = List.from(existing);
+      }
+
+      // Create enhanced redemption with deal and restaurant data
+      final enhancedRedemption = {
+        ...redemption,
+        'deal': widget.dealData ??
+            {
+              'id': widget.dealId,
+              'title': widget.dealTitle,
+            },
+        'restaurant': widget.restaurantData ??
+            {
+              'name': widget.restaurantName,
+            },
+        'createdAt': DateTime.now().toIso8601String(),
+      };
+
+      // Add new redemption
+      redemptions.add(enhancedRedemption);
+
+      // Save back to storage
+      await StorageService.save('active_redemptions', redemptions);
+      print('💾 Saved redemption to local storage');
+      print('📦 Redemption data: $enhancedRedemption');
+    } catch (e) {
+      print('❌ Error saving redemption: $e');
     }
   }
 

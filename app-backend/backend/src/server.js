@@ -8,6 +8,7 @@ const rateLimit = require('express-rate-limit');
 
 // Import services and routes
 const databaseService = require('./services/database');
+const cleanupService = require('./services/cleanupService');
 const apiRoutes = require('./routes');
 
 const app = express();
@@ -112,10 +113,13 @@ app.listen(PORT, async () => {
     // Connect to database
     await databaseService.connect();
     
+    // Start cleanup service for expired redemptions
+    cleanupService.startPeriodicCleanup();
+    
     console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`� API Documentation: http://localhost:${PORT}/`);
+    console.log(`📚 API Documentation: http://localhost:${PORT}/`);
     console.log(`🏥 Health Check: http://localhost:${PORT}/health`);
-    console.log(`� Auth API: http://localhost:${PORT}/api/v1/auth`);
+    console.log(`🔐 Auth API: http://localhost:${PORT}/api/v1/auth`);
     console.log(`🏪 Restaurants API: http://localhost:${PORT}/api/v1/restaurants`);
   } catch (error) {
     console.error('Failed to start server:', error);

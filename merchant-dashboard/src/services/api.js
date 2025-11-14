@@ -53,7 +53,7 @@ class ApiService {
         // Log full error details for debugging
         console.error('API Error Response:', data);
         
-        // Create detailed error message
+        // Create detailed error message with status code
         let errorMessage = data.error?.message || data.message || 'Request failed';
         
         // Add validation details if available
@@ -64,7 +64,8 @@ class ApiService {
           errorMessage += ` - ${validationErrors}`;
         }
         
-        throw new Error(errorMessage);
+        // Include status code in error message for proper handling
+        throw new Error(`${response.status}: ${errorMessage}`);
       }
 
       return data;

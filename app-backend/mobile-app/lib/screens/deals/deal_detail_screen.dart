@@ -86,6 +86,8 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
           dealId: widget.dealId,
           dealTitle: _deal!['title'] ?? 'Deal',
           restaurantName: _restaurant?['name'] ?? 'Restaurant',
+          dealData: _deal,
+          restaurantData: _restaurant,
         ),
       ),
     );

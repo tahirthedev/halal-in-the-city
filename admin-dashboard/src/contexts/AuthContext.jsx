@@ -29,11 +29,20 @@ export const AuthProvider = ({ children }) => {
         if (response.success && response.data?.user) {
           setUser(response.data.user);
         } else {
+          // Only remove token if explicitly unauthorized (401)
+          console.warn('Auth check failed - invalid response');
           apiService.removeToken();
         }
       } catch (error) {
         console.error('Auth check failed:', error);
-        apiService.removeToken();
+        // Only remove token if it's a 401 Unauthorized error
+        // Keep token for network errors or server issues
+        if (error.message && error.message.includes('401')) {
+          console.log('Token expired or invalid - removing');
+          apiService.removeToken();
+        } else {
+          console.log('Auth check failed but keeping token (network or server issue)');
+        }
       }
     }
     

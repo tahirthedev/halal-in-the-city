@@ -50,7 +50,9 @@ class ApiService {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error?.message || data.message || 'Request failed');
+        const errorMessage = data.error?.message || data.message || 'Request failed';
+        // Include status code in error message for proper handling
+        throw new Error(`${response.status}: ${errorMessage}`);
       }
 
       return data;

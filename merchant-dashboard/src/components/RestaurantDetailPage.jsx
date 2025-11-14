@@ -368,7 +368,7 @@ function RestaurantDetailPage() {
             {deals.map((deal) => (
               <div key={deal.id} className="rd-deal-card">
                 <div className="rd-deal-image-wrapper">
-                  <img src={restaurant.logo || defaultImages[0]} alt={deal.title} className="rd-deal-image" />
+                  <img src={(deal.images && deal.images.length > 0) ? deal.images[0] : defaultImages[0]} alt={deal.title} className="rd-deal-image" />
                   <span className={`rd-deal-badge rd-badge-${deal.isActive && new Date(deal.expiresAt) > new Date() ? 'success' : 'warning'}`}>
                     {deal.isActive && new Date(deal.expiresAt) > new Date() ? 'Active' : 'Inactive'}
                   </span>

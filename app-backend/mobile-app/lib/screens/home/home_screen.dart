@@ -6,6 +6,7 @@ import '../../services/deal_service.dart';
 import '../../services/api_service.dart';
 import '../restaurants/restaurant_detail_screen.dart';
 import '../deals/deal_detail_screen.dart';
+import '../coupons/my_active_deals_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,6 +18,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late PageController _bannerPageController;
+  int _currentBannerPage = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String? _selectedCuisine; // Single cuisine selection for filtering
 
@@ -36,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen>
     super.initState();
     print('🏠 HomeScreen initState called');
     _tabController = TabController(length: 3, vsync: this);
+    _bannerPageController = PageController();
 
     // Initialize services
     final apiService = ApiService();
@@ -153,6 +157,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void dispose() {
     _tabController.dispose();
+    _bannerPageController.dispose();
     super.dispose();
   }
 
@@ -207,17 +212,28 @@ class _HomeScreenState extends State<HomeScreen>
                 unselectedLabelColor: Colors.black,
                 indicator: BoxDecoration(
                   color: Colors.black,
-                  borderRadius: BorderRadius.circular(25),
+                  borderRadius: BorderRadius.circular(12),
                 ),
+                labelPadding: const EdgeInsets.symmetric(horizontal: 20),
+                indicatorPadding: const EdgeInsets.symmetric(vertical: 4),
                 dividerColor: Colors.transparent,
                 labelStyle: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
                 tabs: const [
-                  Tab(text: 'Newest'),
-                  Tab(text: 'Featured'),
-                  Tab(text: 'Nearest'),
+                  Tab(
+                    height: 40,
+                    text: 'Newest',
+                  ),
+                  Tab(
+                    height: 40,
+                    text: 'Featured',
+                  ),
+                  Tab(
+                    height: 40,
+                    text: 'Nearest',
+                  ),
                 ],
               ),
             ),
@@ -351,27 +367,56 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _buildBannerCarousel() {
-    return SizedBox(
-      height: 160,
-      child: PageView(
-        children: [
-          _buildBannerCard(
-            title: 'Special Offer\nfor March',
-            subtitle: 'We are here, with the best\ndeserts in town.',
-            buttonText: 'Avail Now',
+    return Column(
+      children: [
+        SizedBox(
+          height: 160,
+          child: PageView(
+            controller: _bannerPageController,
+            onPageChanged: (index) {
+              setState(() {
+                _currentBannerPage = index;
+              });
+            },
+            children: [
+              _buildBannerCard(
+                title: 'Special Offer\nfor March',
+                subtitle: 'We are here, with the best\ndeserts in town.',
+                buttonText: 'Avail Now',
+              ),
+              _buildBannerCard(
+                title: 'Weekend Deal\nExtra 20% Off',
+                subtitle: 'Limited time offer on\nall menu items.',
+                buttonText: 'Grab Now',
+              ),
+              _buildBannerCard(
+                title: 'Family Feast\nBundle',
+                subtitle: 'Perfect combo for your\nfamily gathering.',
+                buttonText: 'Order Now',
+              ),
+            ],
           ),
-          _buildBannerCard(
-            title: 'Weekend Deal\nExtra 20% Off',
-            subtitle: 'Limited time offer on\nall menu items.',
-            buttonText: 'Grab Now',
+        ),
+        const SizedBox(height: 12),
+        // Page indicators
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(
+            3,
+            (index) => Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              width: _currentBannerPage == index ? 24 : 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: _currentBannerPage == index
+                    ? const Color(0xFFB8860B)
+                    : Colors.grey[300],
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
           ),
-          _buildBannerCard(
-            title: 'Family Feast\nBundle',
-            subtitle: 'Perfect combo for your\nfamily gathering.',
-            buttonText: 'Order Now',
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -382,7 +427,6 @@ class _HomeScreenState extends State<HomeScreen>
   }) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFFB8860B), Color(0xFFDAA520)],
@@ -391,85 +435,83 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         borderRadius: BorderRadius.circular(16),
       ),
+      clipBehavior: Clip.hardEdge,
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    height: 1.2,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
-                    fontSize: 11,
-                    height: 1.3,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: () {
-                    // Static for now
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: const Color(0xFFB8860B),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 6,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    minimumSize: const Size(0, 32),
-                  ),
-                  child: Text(
-                    buttonText,
+            flex: 6,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
                     style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      height: 1.2,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.9),
                       fontSize: 11,
-                      fontWeight: FontWeight.w600,
+                      height: 1.3,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: () {
+                      // Static for now
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: const Color(0xFFB8860B),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 6,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      minimumSize: const Size(0, 32),
+                    ),
+                    child: Text(
+                      buttonText,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-          const SizedBox(width: 12),
-          // Burger image
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
+          // Large Burger image - touches container edges
+          Expanded(
+            flex: 4,
             child: Image.asset(
               'assets/images/burger-banner.png',
-              width: 100,
-              height: 100,
-              fit: BoxFit.cover,
+              fit: BoxFit.contain,
+              alignment: Alignment.centerRight,
               errorBuilder: (context, error, stackTrace) {
                 return Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  color: Colors.white.withOpacity(0.2),
                   child: const Icon(
                     Icons.fastfood,
-                    size: 50,
+                    size: 60,
                     color: Colors.white,
                   ),
                 );
@@ -618,7 +660,7 @@ class _HomeScreenState extends State<HomeScreen>
             restaurant['address'] ?? 'Address not available',
             (deal['rating'] ?? 0.0).toDouble(),
             (deal['distance'] ?? 0.0).toDouble(),
-            deal['redeemCount'] ?? 0,
+            deal['remainingUses'] ?? 0,
             dealId: deal['id'],
             imageUrl: imageUrl,
           );
@@ -731,13 +773,17 @@ class _HomeScreenState extends State<HomeScreen>
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 4),
                         decoration: BoxDecoration(
-                          color: Colors.black,
+                          color: Colors.transparent,
+                          border: Border.all(
+                            color: Colors.black,
+                            width: 1.5,
+                          ),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           '$deals Deal',
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: Colors.black,
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
                           ),
@@ -803,7 +849,7 @@ class _HomeScreenState extends State<HomeScreen>
                   restaurant['address'] ?? 'Address not available',
                   (restaurant['averageRating'] ?? 0.0).toDouble(),
                   0.0, // Distance - will be calculated when geolocation is added
-                  (restaurant['deals']?.length ?? 0),
+                  restaurant['currentDeals'] ?? 0,
                   restaurantId: restaurant['id'],
                   logoUrl: logo,
                 ),
@@ -1010,21 +1056,34 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _buildDrawerItem(IconData icon, String title) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.white, size: 24),
-          const SizedBox(width: 16),
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
+    return GestureDetector(
+      onTap: () {
+        if (title == 'My Active Deal') {
+          Navigator.pop(context); // Close drawer first
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const MyActiveDealsScreen(),
             ),
-          ),
-        ],
+          );
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.white, size: 24),
+            const SizedBox(width: 16),
+            Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
