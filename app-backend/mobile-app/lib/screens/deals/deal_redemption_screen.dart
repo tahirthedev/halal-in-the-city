@@ -123,13 +123,19 @@ class _DealRedemptionScreenState extends State<DealRedemptionScreen> {
         'createdAt': DateTime.now().toIso8601String(),
       };
 
+      // Debug: Check if images exist
+      print(
+          '🖼️ Deal images in widget.dealData: ${widget.dealData?['images']}');
+      print('🏪 Restaurant data: ${widget.restaurantData?['name']}');
+
       // Add new redemption
       redemptions.add(enhancedRedemption);
 
       // Save back to storage
       await StorageService.save('active_redemptions', redemptions);
       print('💾 Saved redemption to local storage');
-      print('📦 Redemption data: $enhancedRedemption');
+      print('📦 Deal title: ${enhancedRedemption['deal']?['title']}');
+      print('📦 Restaurant name: ${enhancedRedemption['restaurant']?['name']}');
     } catch (e) {
       print('❌ Error saving redemption: $e');
     }

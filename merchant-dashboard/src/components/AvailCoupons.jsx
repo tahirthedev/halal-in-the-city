@@ -11,26 +11,47 @@ function AvailCoupons() {
   const [verifyingCode, setVerifyingCode] = useState(false)
   const [selectedDeal, setSelectedDeal] = useState(null)
   const [orderAmount, setOrderAmount] = useState('')
+  const [restaurants, setRestaurants] = useState([])
 
   useEffect(() => {
-    fetchRedemptions()
+    fetchRestaurantsAndRedemptions()
   }, [])
 
-  const fetchRedemptions = async () => {
+  const fetchRestaurantsAndRedemptions = async () => {
     try {
       setLoading(true)
-      const response = await apiService.getMyRedemptions()
       
-      if (response.success && response.data.redemptions) {
-        setRedemptions(response.data.redemptions)
+      // First, get merchant's restaurants
+      const restaurantsResponse = await apiService.getMyRestaurants()
+      
+      if (restaurantsResponse.success && restaurantsResponse.data?.restaurants) {
+        const myRestaurants = restaurantsResponse.data.restaurants
+        setRestaurants(myRestaurants)
+        
+        // Then, get redemptions for all restaurants
+        const allRedemptions = []
+        for (const restaurant of myRestaurants) {
+          try {
+            const redemptionsResponse = await apiService.getRestaurantRedemptions(restaurant.id)
+            if (redemptionsResponse.success && redemptionsResponse.data?.redemptions) {
+              allRedemptions.push(...redemptionsResponse.data.redemptions)
+            }
+          } catch (err) {
+            console.error(`Error fetching redemptions for restaurant ${restaurant.id}:`, err)
+          }
+        }
+        
+        setRedemptions(allRedemptions)
       }
     } catch (err) {
-      console.error('Error fetching redemptions:', err)
+      console.error('Error fetching data:', err)
       setError('Failed to load coupons')
     } finally {
       setLoading(false)
     }
   }
+
+  const fetchRedemptions = fetchRestaurantsAndRedemptions
 
   const handleVerifyCode = async (e) => {
     e.preventDefault()
@@ -228,22 +249,45 @@ function AvailCoupons() {
                         <p className="deal-description">
                           Discount: {getDiscountText(redemption.deal?.discountType, redemption.deal?.discountValue)}
                         </p>
+                        
+                        {/* Customer Information */}
+                        <div style={{ marginTop: '12px', padding: '12px', background: '#f8f8f8', borderRadius: '8px', fontSize: '13px' }}>
+                          <p style={{ marginBottom: '4px', fontWeight: '600', color: '#333' }}>
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ verticalAlign: 'middle', marginRight: '4px' }}>
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            Customer: {redemption.user?.firstName || ''} {redemption.user?.lastName || ''}
+                          </p>
+                          <p style={{ marginBottom: '4px', color: '#666' }}>
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ verticalAlign: 'middle', marginRight: '4px' }}>
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            Email: {redemption.user?.email || 'N/A'}
+                          </p>
+                          <p style={{ color: '#666' }}>
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ verticalAlign: 'middle', marginRight: '4px' }}>
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                            </svg>
+                            User ID: {redemption.user?.id?.substring(0, 12) || 'N/A'}...
+                          </p>
+                        </div>
+
                         <div className="deal-footer">
                           <div className="deal-stats">
                             <span className="deal-stat">
                               <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                               </svg>
-                              Claimed: {formatDate(redemption.redeemedAt || redemption.createdAt)}
+                              {redemption.status === 'PENDING' ? 'Generated' : 'Redeemed'}: {formatDate(redemption.redeemedAt || redemption.createdAt)}
                             </span>
                           </div>
-                          {redemption.deal?.expiresAt && (
+                          {redemption.discountAmount > 0 && (
                             <div className="deal-stats">
-                              <span className="deal-stat">
+                              <span className="deal-stat" style={{ color: '#C69A1A', fontWeight: 'bold' }}>
                                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                Expires: {formatDate(redemption.deal.expiresAt)}
+                                Saved: ${redemption.discountAmount.toFixed(2)}
                               </span>
                             </div>
                           )}

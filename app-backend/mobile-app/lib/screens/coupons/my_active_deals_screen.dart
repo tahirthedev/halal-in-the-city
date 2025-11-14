@@ -27,10 +27,46 @@ class _MyActiveDealsScreenState extends State<MyActiveDealsScreen> {
       final redemptions = StorageService.get('active_redemptions');
 
       if (redemptions != null && redemptions is List) {
+        // Filter out invalid/expired redemptions
+        final validRedemptions = redemptions.where((redemption) {
+          // Must have deal and restaurant data
+          if (redemption['deal'] == null || redemption['restaurant'] == null) {
+            print(
+                '⚠️ Skipping redemption without deal/restaurant data: ${redemption['id']}');
+            return false;
+          }
+
+          // Check if expired (24 hours)
+          if (redemption['createdAt'] != null) {
+            try {
+              final activationDate = DateTime.parse(redemption['createdAt']);
+              final expiryDate = activationDate.add(const Duration(hours: 24));
+              final now = DateTime.now();
+              if (expiryDate.isBefore(now)) {
+                print('⚠️ Skipping expired redemption: ${redemption['id']}');
+                return false;
+              }
+            } catch (e) {
+              print(
+                  '⚠️ Error parsing date for redemption: ${redemption['id']}');
+            }
+          }
+
+          return true;
+        }).toList();
+
         setState(() {
-          _activeRedemptions = List.from(redemptions);
+          _activeRedemptions = validRedemptions;
           _isLoading = false;
         });
+
+        // Save cleaned list back to storage
+        if (validRedemptions.length != redemptions.length) {
+          await StorageService.save('active_redemptions', validRedemptions);
+          print(
+              '🧹 Cleaned up ${redemptions.length - validRedemptions.length} invalid/expired redemptions');
+        }
+
         print('Loaded ${_activeRedemptions.length} active redemptions');
         if (_activeRedemptions.isNotEmpty) {
           print('First redemption: ${_activeRedemptions[0]}');
